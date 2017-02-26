@@ -2,6 +2,7 @@ package com.example.yassir.schedulefill;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -67,10 +68,12 @@ public class fillCourse extends AppCompatActivity {
     {
         public int height;
         public LinearLayout ourLayout;
+        public flagClass myBackGroundColorFlag;
         public linearLayoutCollect(int height, LinearLayout ourLayout)
         {
             this.height = height;
             this.ourLayout = ourLayout;
+            this.myBackGroundColorFlag = new flagClass();
         }
     }
     public class stringClass
@@ -328,7 +331,7 @@ public class fillCourse extends AppCompatActivity {
                         }
                         catch (InterruptedException e)
                         {
-                            Log.d("Fail", "Thread Sleep");
+                            //Log.d("Fail", "Thread Sleep");
                         }
 
                     }
@@ -339,7 +342,7 @@ public class fillCourse extends AppCompatActivity {
                         }
                         catch (InterruptedException e)
                         {
-                            Log.d("Fail", "Thread Sleep");
+                            //Log.d("Fail", "Thread Sleep");
                         }
                     }
                 }
@@ -385,7 +388,7 @@ public class fillCourse extends AppCompatActivity {
         }
         catch (InterruptedException e)
         {
-            Log.d("Thread Join", "Interrupted");
+            //Log.d("Thread Join", "Interrupted");
         }
         String totalOrg = "";
         int x = 0;
@@ -394,13 +397,14 @@ public class fillCourse extends AppCompatActivity {
             if(x == 0 || totalOrg.isEmpty() || totalOrg.equals("")) { x++; }
             else { totalOrg = totalOrg + ","; }
             totalOrg = totalOrg + additionalName;
-            Log.d("Show All: " , "Data: " + totalOrg);
+            //Log.d("Show All: " , "Data: " + totalOrg);
         }
 
         EditText departmentSelection = (EditText) findViewById(R.id.departmentSearch);
         Button departmentClear = (Button) findViewById(R.id.clearOrgList);
         final TextView departmentsSelected = (TextView) findViewById(R.id.orgList);
         //final ListView departmentList = (ListView) findViewById(R.id.departmentSelections);
+        final ArrayList<linearLayoutCollect> inflatedLayouts = new ArrayList<>();
 
         departmentClear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -411,6 +415,11 @@ public class fillCourse extends AppCompatActivity {
                         departmentsSelected.setText("");
                     }
                 });
+                for(linearLayoutCollect removeBackground : inflatedLayouts)
+                {
+                    removeBackground.ourLayout.setBackgroundColor(Color.WHITE);
+                    removeBackground.myBackGroundColorFlag.flag = false;
+                }
             }
         });
 
@@ -424,11 +433,11 @@ public class fillCourse extends AppCompatActivity {
         //setListViewHeightBasedOnChildren(departmentList, listViewFlag.flag);
         final LinearLayout orgHolder = (LinearLayout) findViewById(R.id.holdOrgs);
         final ArrayList<Integer> inflatedLayoutHeights = new ArrayList<>();
-        final ArrayList<linearLayoutCollect> inflatedLayouts = new ArrayList<>();
         for(Selections selectionToInflate : SelectionsToBeShown)
         {
             LinearLayout nextInflation = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.department_listview_element, orgHolder, false);
             orgHolder.addView(nextInflation);
+            final linearLayoutCollect myLayoutCollect = new linearLayoutCollect(-1, nextInflation);
             final TextView code = (TextView) nextInflation.findViewById(R.id.departmentCode);
             final TextView descrip = (TextView) nextInflation.findViewById(R.id.departmentText);
             code.setText(selectionToInflate.name);
@@ -436,7 +445,18 @@ public class fillCourse extends AppCompatActivity {
             nextInflation.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    departmentsSelected.setText(departmentsSelected.getText().toString() + code.getText() + ",");
+                    if(myLayoutCollect.myBackGroundColorFlag.flag == false)
+                    {
+                        myLayoutCollect.ourLayout.setBackgroundColor(Color.BLUE);
+                        myLayoutCollect.myBackGroundColorFlag.flag = true;
+                        departmentsSelected.setText(departmentsSelected.getText().toString() + code.getText() + ",");
+                    }
+                    else
+                    {
+                        myLayoutCollect.ourLayout.setBackgroundColor(Color.WHITE);
+                        myLayoutCollect.myBackGroundColorFlag.flag = false;
+                        departmentsSelected.setText(departmentsSelected.getText().toString().replaceAll(code.getText() + ",", ""));
+                    }
                 }
             });
             inflatedLayoutHeights.add(nextInflation.getMeasuredHeight());
@@ -498,12 +518,12 @@ public class fillCourse extends AppCompatActivity {
                     }
                     else
                     {
-                        Log.d("Course Info", "Course Info: " + nextLayout.ourLayout.findViewById(R.id.departmentText).toString().toLowerCase());
-                        Log.d("Course Info", "charseq: " + charSequence.toString().toLowerCase());
+                        //Log.d("Course Info", "Course Info: " + nextLayout.ourLayout.findViewById(R.id.departmentText).toString().toLowerCase());
+                        //Log.d("Course Info", "charseq: " + charSequence.toString().toLowerCase());
                         //inflatedLayouts.get(i).setVisibility(View.VISIBLE);
                         params.height = nextLayout.height;
                     }
-                    Log.d("Layout Height", "Inflated height was: " + nextLayout.height);
+                    //Log.d("Layout Height", "Inflated height was: " + nextLayout.height);
                     inflatedLayouts.get(i).ourLayout.setLayoutParams(params);
                 }
             }
@@ -637,7 +657,7 @@ public class fillCourse extends AppCompatActivity {
                                 Iterator<String> keys = data.keys();
                                 while(keys.hasNext())
                                 {
-                                    Log.d("Note", "1");
+                                    //Log.d("Note", "1");
                                     boolean addFlag = true;
                                     String key = keys.next();
                                     JSONObject courseToBeAdded = data.getJSONObject(key);
@@ -683,7 +703,7 @@ public class fillCourse extends AppCompatActivity {
                                                     String day = info.getString("meetingDay");
                                                     String startTime = info.getString("meetingStartTime");
                                                     String endTime = info.getString("meetingEndTime");
-                                                    Log.d("timeInfo", "START: " + startTime + " END: " + endTime + " CourseCode: " + courseCode + " MeetingKey: " + meetingKey);
+                                                    //Log.d("timeInfo", "START: " + startTime + " END: " + endTime + " CourseCode: " + courseCode + " MeetingKey: " + meetingKey);
                                                     if (!(startTime.contains("null") || endTime.contains("null"))) {
                                                         int startInt = Integer.parseInt(startTime.split(":")[0]);
                                                         int endInt = Integer.parseInt(endTime.split(":")[0]);
@@ -1024,8 +1044,7 @@ public class fillCourse extends AppCompatActivity {
     {
         for(int i = 0; i < s.length()/100; i++)
         {
-            //SmsManager.getDefault().sendTextMessage("4169088609", null, s.substring(i*100, (i+1)*100), null, null);
-            Log.d("Text ", s.substring(i*100, (i+1)*100));
+            //Log.d("Text ", s.substring(i*100, (i+1)*100));
             try {
                 Thread.sleep(100);
             }
@@ -1036,8 +1055,7 @@ public class fillCourse extends AppCompatActivity {
             }
         }
         if(!s.substring(((s.length()) / 100) * 100, s.length()).isEmpty()) {
-            //SmsManager.getDefault().sendTextMessage("4169088609", null, s.substring(((s.length()) / 100) * 100, s.length()), null, null);
-            Log.d("Text ", s.substring(((s.length()) / 100) * 100, s.length()));
+            //Log.d("Text ", s.substring(((s.length()) / 100) * 100, s.length()));
         }
 
         try {

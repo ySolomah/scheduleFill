@@ -68,7 +68,7 @@ public class displayArtSciCourses extends AppCompatActivity {
                     {
                         params.height = ourHeaderInfo.height - absListView.getScrollY();
                     }
-                    Log.d("Height", "HEIGHT OF HEADER: " + Integer.toString(ourHeaderInfo.height) + " I SCROLLED: " + absListView.getScrollY());
+                    //Log.d("Height", "HEIGHT OF HEADER: " + Integer.toString(ourHeaderInfo.height) + " I SCROLLED: " + absListView.getScrollY());
                     ourHeaderInfo.header.setLayoutParams(params);
                 }
             }
