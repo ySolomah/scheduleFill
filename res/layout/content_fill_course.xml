@@ -246,12 +246,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/courseCodeText"
+                        android:layout_margin="4dp"
                         android:text="Input the three letter course code you're interested in below"/>
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:layout_below="@id/courseCodeText"
                         android:id="@+id/threeCourseCode"
+                        android:layout_margin="4dp"
                         android:hint="Input three letter course code"/>
                 </RelativeLayout>
                 <CheckBox
@@ -273,13 +275,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@drawable/back">
+                    android:background="@drawable/back2">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Select the section you're looking for"/>
                     <Spinner
-                        android:layout_width="100dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/sectionSpinner"
                         android:gravity="left"></Spinner>

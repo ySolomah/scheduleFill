@@ -60,7 +60,7 @@ public class display_schedulable_courses extends AppCompatActivity {
         getSupportActionBar().setTitle("");
 
 
-        for(fillCourse.condensedCourseTotal ourCourse : fitsInSchedule)
+        for(final fillCourse.condensedCourseTotal ourCourse : fitsInSchedule)
         {
             if(holderHasFiller) {
                 holder.removeView(filler);
@@ -79,7 +79,14 @@ public class display_schedulable_courses extends AppCompatActivity {
             courseDescrip.setText("Descrip: " + ourCourse.courseDescrip);
             coursePrereqs.setText("Prereqs: " + ourCourse.coursePrereqs);
             courseSection.setText("Section: " + ourCourse.courseSection);
-            courseSession.setText("Session: " + ourCourse.courseSession);
+            if(ourCourse.courseSection.contains("S") && (int) ourCourse.courseSession.charAt(ourCourse.courseSession.length()-1) == 57)
+            {
+                int temp = Integer.parseInt(ourCourse.courseSession);
+                courseSession.setText("Session: " + Integer.toString(temp+2));
+            }
+            else {
+                courseSession.setText("Session: " + ourCourse.courseSession);
+            }
 
             toReturn.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -90,7 +97,15 @@ public class display_schedulable_courses extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW);
-                            browserIntent.setData(Uri.parse("http://coursefinder.utoronto.ca/course-search/search/courseInquiry?methodToCall=start&viewId=CourseDetails-InquiryView&courseId=" + courseCode.getText().toString() + courseSection.getText().toString() + courseSession.getText().toString()));
+                            if(ourCourse.courseSection.contains("S") && (int) ourCourse.courseSession.charAt(ourCourse.courseSession.length()-1) == 57)
+                            {
+                                int temp = Integer.parseInt(ourCourse.courseSession);
+                                browserIntent.setData(Uri.parse("http://coursefinder.utoronto.ca/course-search/search/courseInquiry?methodToCall=start&viewId=CourseDetails-InquiryView&courseId=" + ourCourse.courseCode + ourCourse.courseSection + Integer.toString(temp+2)));
+                            }
+                            else
+                            {
+                                browserIntent.setData(Uri.parse("http://coursefinder.utoronto.ca/course-search/search/courseInquiry?methodToCall=start&viewId=CourseDetails-InquiryView&courseId=" + ourCourse.courseCode + ourCourse.courseSection + ourCourse.courseSession));
+                            }
                             startActivity(browserIntent);
                         }
                     });

@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -531,18 +532,25 @@ public class fillCourse extends AppCompatActivity {
 
 
         Spinner sectionSpinner = (Spinner) findViewById(R.id.sectionSpinner);
+        final ArrayList<String> sectionsListExpanded = new ArrayList<>();
+        sectionsListExpanded.add("Any Session");
+        sectionsListExpanded.add("F - First (Fall Session)");
+        sectionsListExpanded.add("S - Second (Winter Session)");
+        sectionsListExpanded.add("Y - Year (Fall & Winter)");
         final ArrayList<String> sectionsList = new ArrayList<>();
         sectionsList.add("Any");
         sectionsList.add("F");
         sectionsList.add("S");
         sectionsList.add("Y");
-        ArrayAdapter<String> sectionsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, sectionsList);
+        ArrayAdapter<String> sectionsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, sectionsListExpanded);
         sectionsAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         final stringClass sectionsString = new stringClass();
+        sectionSpinner.setAdapter(sectionsAdapter);
         sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 sectionsString.myString = sectionsList.get(i);
+                if(i == 0) { sectionsString.myString = ""; }
             }
 
             @Override
@@ -562,7 +570,7 @@ public class fillCourse extends AppCompatActivity {
         waitListCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(!b) { waitList.myString = "t"; }
+                if(b) { waitList.myString = "t"; }
                 else { waitList.myString = ""; }
             }
         });
@@ -570,15 +578,15 @@ public class fillCourse extends AppCompatActivity {
         spaceAvailabilityCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(!b) { spaceAvailability.myString = "t"; }
-                else { spaceAvailability.myString = ""; }
+                if(b) { spaceAvailability.myString = "t"; }
+                else { waitList.myString = ""; }
             }
         });
 
         onlineCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(!b) { online.myString = "t"; }
+                if(b) { online.myString = "t"; }
                 else { online.myString = ""; }
             }
         });
@@ -682,7 +690,7 @@ public class fillCourse extends AppCompatActivity {
                         +"&available="+ available
                         +"&title="+ courseTitle
                         ;*/
-                        EditText threeCourseCode = (EditText) findViewById(R.id.threeCourseCode);
+                EditText threeCourseCode = (EditText) findViewById(R.id.threeCourseCode);
 
 
                 final String urlToUse = "https://timetable.iit.artsci.utoronto.ca/api/courses?org="
@@ -693,6 +701,7 @@ public class fillCourse extends AppCompatActivity {
                         + "&waitlist=" + waitList.myString
                         + "&available=" + spaceAvailability.myString;
                 textQueue.add("URL used: " + urlToUse);
+                Log.d("totalString", urlToUse);
                 Thread networkThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
