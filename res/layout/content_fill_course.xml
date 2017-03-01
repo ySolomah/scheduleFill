@@ -228,12 +228,74 @@
         </LinearLayout>
     </RelativeLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkBoxRel"
+            android:layout_below="@id/fridayRel"
+            android:background="@drawable/back">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/back2">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/courseCodeText"
+                        android:text="Input the three letter course code you're interested in below"/>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_below="@id/courseCodeText"
+                        android:id="@+id/threeCourseCode"
+                        android:hint="Input three letter course code"/>
+                </RelativeLayout>
+                <CheckBox
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Only filter for courses with waitlist option"
+                    android:id="@+id/waitlistCheckBox"/>
+                <CheckBox
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Only filter for courses with space"
+                    android:id="@+id/spaceAvailabilityCheckBox"/>
+                <CheckBox
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Only filter for courses that are online"
+                    android:id="@+id/onlineCheckBox"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/back">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Select the section you're looking for"/>
+                    <Spinner
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/sectionSpinner"
+                        android:gravity="left"></Spinner>
+                </LinearLayout>
+
+
+
+
+            </LinearLayout>
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/back2"
-            android:layout_below="@id/fridayRel">
+            android:layout_below="@id/checkBoxRel">
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

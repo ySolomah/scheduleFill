@@ -1,80 +1,107 @@
-package com.example.yassir.schedulefill;
+package com.uoft.gobblgobble.schedulefiller;
 
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
-
-import org.w3c.dom.Text;
+import com.uoft.gobblgobble.schedulefiller.R;
 
 import java.util.ArrayList;
 
-public class display_schedulable_courses extends AppCompatActivity {
+public class displayArtSciCourses extends AppCompatActivity {
+
+    public class headerInfo
+    {
+        public int height;
+        public TextView header;
+        public headerInfo(int height, TextView header)
+        {
+            this.height = height;
+            this.header = header;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_display_schedulable_courses);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        setContentView(R.layout.activity_display_art_sci_courses);
+        ArrayList<fillCourse.condensedCourseTotal> fitsInSchedule = getIntent().getParcelableArrayListExtra("courses");
+        TextView header = (TextView) findViewById(R.id.artsciHeader);
+        final headerInfo ourHeaderInfo = new headerInfo(-1, header);
+        final ListView listView = (ListView) findViewById(R.id.artsciList);
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+                if(ourHeaderInfo.height == -1)
+                {
+                    ourHeaderInfo.height = ourHeaderInfo.header.getMeasuredHeight();
+                }
+                if(absListView.getScrollY() > 0)
+                {
+                    ViewGroup.LayoutParams params = ourHeaderInfo.header.getLayoutParams();
+                    if(absListView.getScrollY() >= ourHeaderInfo.height)
+                    {
+                        params.height = 0;
+                    }
+                    else
+                    {
+                        params.height = ourHeaderInfo.height - absListView.getScrollY();
+                    }
+                    //Log.d("Height", "HEIGHT OF HEADER: " + Integer.toString(ourHeaderInfo.height) + " I SCROLLED: " + absListView.getScrollY());
+                    ourHeaderInfo.header.setLayoutParams(params);
+                }
             }
         });
+        courseFillAdapter adapter = new courseFillAdapter(fitsInSchedule, this);
+        listView.setAdapter(adapter);
+    }
 
-        ArrayList<fillCourse.condensedCourseTotal> fitsInSchedule = getIntent().getParcelableArrayListExtra("courses");
+    public class courseFillAdapter extends ArrayAdapter<fillCourse.condensedCourseTotal>
+    {
+        public ArrayList<fillCourse.condensedCourseTotal> ourList;
+        public Context sharedContext;
 
-        MobileAds.initialize(this, "ca-app-pub-5269640446877970~6452380842");
-
-        AdView adView = (AdView) findViewById(R.id.testAd);
-        AdRequest request = new AdRequest.Builder().build();
-        adView.loadAd(request);
-
-        TextView filler = (TextView) findViewById(R.id.fillerNoCourse);
-        boolean holderHasFiller = true;
-
-        LinearLayout holder = (LinearLayout) findViewById(R.id.courseHolders);
-
-        Toolbar topToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(topToolbar);
-        getSupportActionBar().setTitle("");
-
-
-        for(fillCourse.condensedCourseTotal ourCourse : fitsInSchedule)
+        public courseFillAdapter(ArrayList<fillCourse.condensedCourseTotal> ourList, Context sharedContext)
         {
-            if(holderHasFiller) {
-                holder.removeView(filler);
-                holderHasFiller = false;
+            super(sharedContext, -1 , ourList);
+            this.sharedContext = sharedContext;
+            this.ourList = ourList;
+        }
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View toReturn = convertView;
+            if(toReturn == null)
+            {
+                toReturn = getLayoutInflater().from(sharedContext).inflate(R.layout.artsci_course_info, parent, false);
             }
-            View toReturn = LayoutInflater.from(this).inflate(R.layout.artsci_course_info, holder, false);
             final TextView courseCode = (TextView) toReturn.findViewById(R.id.courseCode);
             final TextView courseTitle = (TextView) toReturn.findViewById(R.id.courseTitle);
             final TextView courseDescrip = (TextView) toReturn.findViewById(R.id.courseDescrip);
             final TextView coursePrereqs = (TextView) toReturn.findViewById(R.id.coursePrereqs);
             final TextView courseSection = (TextView) toReturn.findViewById(R.id.courseSection);
             final TextView courseSession = (TextView) toReturn.findViewById(R.id.courseSession);
+
+            fillCourse.condensedCourseTotal ourCourse = ourList.get(position);
 
             courseCode.setText("Code: " + ourCourse.courseCode);
             courseTitle.setText("Title: " + ourCourse.courseTitle);
@@ -86,8 +113,7 @@ public class display_schedulable_courses extends AppCompatActivity {
             toReturn.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
-                    AlertDialog.Builder popUpDialog = new AlertDialog.Builder(display_schedulable_courses.this, R.style.CustomDialog);
-                    popUpDialog.setMessage("More Options");
+                    AlertDialog.Builder popUpDialog = new AlertDialog.Builder(sharedContext);
                     popUpDialog.setPositiveButton("Browser", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -110,8 +136,8 @@ public class display_schedulable_courses extends AppCompatActivity {
                                     coursePrereqs.getText().toString() +
                                     "\nSession " + courseSession.getText().toString() + "-" + courseSection.getText().toString());
                             clipboard.setPrimaryClip(clip);
-                            Toast newToast = new Toast(display_schedulable_courses.this);
-                            newToast.makeText(display_schedulable_courses.this, "Copied!", Toast.LENGTH_SHORT).show();
+                            Toast newToast = new Toast(sharedContext);
+                            newToast.makeText(getApplicationContext(), "Copied!", Toast.LENGTH_SHORT).show();
                         }
                     });
                     popUpDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -122,8 +148,7 @@ public class display_schedulable_courses extends AppCompatActivity {
                     return(true);
                 }
             });
-            holder.addView(toReturn);
+            return (toReturn);
         }
-
     }
 }

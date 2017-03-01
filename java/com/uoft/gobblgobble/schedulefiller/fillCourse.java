@@ -1,4 +1,4 @@
-package com.example.yassir.schedulefill;
+package com.uoft.gobblgobble.schedulefiller;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,22 +9,13 @@ import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
-import android.telephony.SmsManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.JsonReader;
-import android.util.JsonToken;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -34,33 +25,25 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-//import com.gargoylesoftware.htmlunit.WebClient;
-//import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.uoft.gobblgobble.schedulefiller.R;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
-import org.jsoup.select.Elements;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
+
+//import com.gargoylesoftware.htmlunit.WebClient;
+//import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 public class fillCourse extends AppCompatActivity {
 
@@ -90,6 +73,7 @@ public class fillCourse extends AppCompatActivity {
             flag = false;
         }
     }
+
 
     public class MyJavaScriptInterface
     {
@@ -545,6 +529,60 @@ public class fillCourse extends AppCompatActivity {
         final ArrayList<condensedCourseTotal> transferToNext = new ArrayList<>();
 
 
+
+        Spinner sectionSpinner = (Spinner) findViewById(R.id.sectionSpinner);
+        final ArrayList<String> sectionsList = new ArrayList<>();
+        sectionsList.add("Any");
+        sectionsList.add("F");
+        sectionsList.add("S");
+        sectionsList.add("Y");
+        ArrayAdapter<String> sectionsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, sectionsList);
+        sectionsAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        final stringClass sectionsString = new stringClass();
+        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                sectionsString.myString = sectionsList.get(i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                sectionsString.myString = "";
+            }
+        });
+
+        CheckBox waitListCheckBox = (CheckBox) findViewById(R.id.waitlistCheckBox);
+        CheckBox spaceAvailabilityCheckBox = (CheckBox) findViewById(R.id.spaceAvailabilityCheckBox);
+        CheckBox onlineCheckBox = (CheckBox) findViewById(R.id.onlineCheckBox);
+
+        final stringClass waitList = new stringClass();
+        final stringClass spaceAvailability = new stringClass();
+        final stringClass online = new stringClass();
+
+        waitListCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(!b) { waitList.myString = "t"; }
+                else { waitList.myString = ""; }
+            }
+        });
+
+        spaceAvailabilityCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(!b) { spaceAvailability.myString = "t"; }
+                else { spaceAvailability.myString = ""; }
+            }
+        });
+
+        onlineCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(!b) { online.myString = "t"; }
+                else { online.myString = ""; }
+            }
+        });
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -627,7 +665,33 @@ public class fillCourse extends AppCompatActivity {
                 failedToAddCourses.clear();
                 fitsInSchedule.clear();
                 transferToNext.clear();
-                final String urlToUse = "https://timetable.iit.artsci.utoronto.ca/api/courses?org=" + departmentsSelected.getText().toString();
+
+
+                /*
+                var searchApiUrl = "/api/courses?"
+                        +"org="+ departments
+                        +"&code="+ courseCode
+                        +"&section="+ sections
+                        +"&studyyear="+ studyYears
+                        +"&daytime="+ dayTimes
+                        +"&weekday="+ weekDays
+                        +"&prof="+ instructor
+                        +"&breadth="+ breadth
+                        +"&online="+ online
+                        +"&waitlist="+ waitlist
+                        +"&available="+ available
+                        +"&title="+ courseTitle
+                        ;*/
+                        EditText threeCourseCode = (EditText) findViewById(R.id.threeCourseCode);
+
+
+                final String urlToUse = "https://timetable.iit.artsci.utoronto.ca/api/courses?org="
+                        + departmentsSelected.getText().toString()
+                        + "&code=" + threeCourseCode.getText().toString()
+                        + "&section=" + sectionsString.myString
+                        + "&online=" + online.myString
+                        + "&waitlist=" + waitList.myString
+                        + "&available=" + spaceAvailability.myString;
                 textQueue.add("URL used: " + urlToUse);
                 Thread networkThread = new Thread(new Runnable() {
                     @Override
@@ -1008,9 +1072,9 @@ public class fillCourse extends AppCompatActivity {
             endSpinner.setOnItemSelectedListener( new customStartEndAdapter(myTimes.size()-1, myTimes) );
             Toast.makeText(sharedContext, "Successfully added new spinners", Toast.LENGTH_LONG).show();
         }
-
-
     }
+
+
 
     public class customStartEndAdapter implements AdapterView.OnItemSelectedListener
     {
