@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.example.yassir.schedulefill.display_schedulable_courses">
+    tools:context="com.uoft.gobblgobble.schedulefiller.display_schedulable_courses">
+
+    <!---
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
@@ -40,8 +42,12 @@
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
+    -->
+
     <include layout="@layout/content_display_schedulable_courses" />
 
+
+    <!---
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -50,5 +56,5 @@
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end"
         app:srcCompat="@android:drawable/ic_dialog_email" />
-
+    -->
 </android.support.design.widget.CoordinatorLayout>
