@@ -9,12 +9,15 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,10 +40,45 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class display_schedulable_courses extends AppCompatActivity {
+
+    public class flagClass
+    {
+        public boolean flag;
+        public flagClass()
+        {
+            this.flag = false;
+        }
+    }
+
+    public static class extendedCondensed {
+        String courseCode;
+        String courseTitle;
+        String courseDescrip;
+        String coursePrereqs;
+        String courseSection;
+        String courseSession;
+        String lectureTimes;
+        String tutorialTimes;
+        String practicalTimes;
+
+        public extendedCondensed(String courseCode, String courseDescrip, String coursePrereqs, String courseSection, String courseTitle, String courseSession, String lectureTimes, String tutorialTimes, String practicalTimes) {
+            this.courseSession = courseSession;
+            this.courseCode = courseCode;
+            this.courseDescrip = courseDescrip;
+            this.coursePrereqs = coursePrereqs;
+            this.courseSection = courseSection;
+            this.courseTitle = courseTitle;
+            this.lectureTimes = lectureTimes;
+            this.tutorialTimes = tutorialTimes;
+            this.practicalTimes = practicalTimes;
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +90,103 @@ public class display_schedulable_courses extends AppCompatActivity {
 
         DBhelper myHelper = new DBhelper(this);
 
-        ArrayList<ArrayList<fillCourse.condensedCourseTotal>> pagerArray = new ArrayList<>();
+        ArrayList<ArrayList<extendedCondensed>> pagerArray = new ArrayList<>();
 
-        ArrayList<fillCourse.condensedCourseTotal> fitsInSchedule = getIntent().getParcelableArrayListExtra("courses");
+        ArrayList<fillCourse.largerMatchesLists> fitsInScheduleTimes = getIntent().getParcelableArrayListExtra("coursesTimes");
+        ArrayList<fillCourse.condensedCourseTotal> fitsInScheduleCondensed = getIntent().getParcelableArrayListExtra("coursesCondensed");
+        ArrayList<extendedCondensed> fitsInSchedule = new ArrayList<>();
+
+        for(int i = 0; i < fitsInScheduleCondensed.size(); i++)
+        {
+            int count = 1;
+            String lec =  "\n\nLectures: \n";
+            for(fillCourse.largerMatches nextLec : fitsInScheduleTimes.get(i).lectureLargerMatches)
+            {
+                if(nextLec.day.contains("X")) {
+                    if(count > 1)
+                    {
+                        lec += "\n";
+                    }
+                    lec += "Lecture Option - " + Integer.toString(count) + "\n";
+                    count++;
+                }
+                else {
+                    lec += nextLec.day + " : " + nextLec.matchStartTime + " - " + nextLec.matchEndTime + "\n";
+                }
+            }
+            count = 1;
+            String tut =  "Tutorials: \n";
+            for(fillCourse.largerMatches nextTut : fitsInScheduleTimes.get(i).tutorialLargerMatches)
+            {
+                if(nextTut.day.contains("X")) {
+                    if(count > 1)
+                    {
+                        tut += "\n";
+                    }
+                    tut += "Tutorial Option - " + Integer.toString(count) + "\n";
+                    count++;
+                }
+                else {
+                    tut += nextTut.day + " : " + nextTut.matchStartTime + " - " + nextTut.matchEndTime + "\n";
+                }
+            }
+            count = 1;
+            String pra =  "Practicals: \n";
+            for(fillCourse.largerMatches nextPra : fitsInScheduleTimes.get(i).practicalLargerMatches)
+            {
+                if(nextPra.day.contains("X")) {
+                    if(count > 1)
+                    {
+                        pra += "\n";
+                    }
+                    pra += "Practical Option - " + Integer.toString(count) + "\n";
+                    count++;
+                }
+                else {
+                    pra += nextPra.day + " : " + nextPra.matchStartTime + " - " + nextPra.matchEndTime + "\n";
+                }
+            }
+            if(fitsInScheduleTimes.get(i).lectureLargerMatches.size() == 1)
+            {
+                lec = "";
+            }
+            if(fitsInScheduleTimes.get(i).tutorialLargerMatches.size() == 1)
+            {
+                tut = "";
+            }
+            if(fitsInScheduleTimes.get(i).practicalLargerMatches.size() == 1)
+            {
+                pra = "";
+            }
+            fitsInSchedule.add(new extendedCondensed(
+                    fitsInScheduleCondensed.get(i).courseCode,
+                    fitsInScheduleCondensed.get(i).courseDescrip,
+                    fitsInScheduleCondensed.get(i).coursePrereqs,
+                    fitsInScheduleCondensed.get(i).courseSection,
+                    fitsInScheduleCondensed.get(i).courseTitle,
+                    fitsInScheduleCondensed.get(i).courseSession,
+                    lec,
+                    tut,
+                    pra
+            ));
+        }
+
+        for(int i = 0; i < fitsInScheduleTimes.size(); i++)
+        {
+            Log.d("Course", fitsInSchedule.get(i).courseCode);
+            for(fillCourse.largerMatches courseTimes : fitsInScheduleTimes.get(i).lectureLargerMatches)
+            {
+                Log.d("Lecture", "Start: " + courseTimes.matchStartTime + " End: " + courseTimes.matchEndTime + " Day: " + courseTimes.day);
+            }
+            for(fillCourse.largerMatches courseTimes : fitsInScheduleTimes.get(i).tutorialLargerMatches)
+            {
+                Log.d("Tutorial", "Start: " + courseTimes.matchStartTime + " End: " + courseTimes.matchEndTime + " Day: " + courseTimes.day);
+            }
+            for(fillCourse.largerMatches courseTimes : fitsInScheduleTimes.get(i).practicalLargerMatches)
+            {
+                Log.d("Practical", "Start: " + courseTimes.matchStartTime + " End: " + courseTimes.matchEndTime + " Day: " + courseTimes.day);
+            }
+        }
 
         pagerArray.add(fitsInSchedule);
         pagerArray.add(myHelper.getAllCourses());
@@ -213,12 +346,13 @@ public class display_schedulable_courses extends AppCompatActivity {
     }
 
     protected class customPagerAdapter extends PagerAdapter {
-        public ArrayList<ArrayList<fillCourse.condensedCourseTotal>> sharedList;
+        public ArrayList<ArrayList<extendedCondensed>> sharedList;
         public Context sharedContext;
         public DBhelper myHelper;
         public LinearLayout savedViewHolder;
+        public TextView savedCoursesTextView;
 
-        public customPagerAdapter(ArrayList<ArrayList<fillCourse.condensedCourseTotal>> sharedList, Context sharedContext, DBhelper myHelper) {
+        public customPagerAdapter(ArrayList<ArrayList<extendedCondensed>> sharedList, Context sharedContext, DBhelper myHelper) {
             this.sharedContext = sharedContext;
             this.sharedList = sharedList;
             this.myHelper = myHelper;
@@ -242,7 +376,7 @@ public class display_schedulable_courses extends AppCompatActivity {
             setSupportActionBar(toolbar);
 
 
-            ArrayList<fillCourse.condensedCourseTotal> fitsInSchedule = sharedList.get(position % sharedList.size());
+            ArrayList<extendedCondensed> fitsInSchedule = sharedList.get(position % sharedList.size());
 
             MobileAds.initialize(sharedContext, "ca-app-pub-5269640446877970~6452380842");
 
@@ -252,6 +386,9 @@ public class display_schedulable_courses extends AppCompatActivity {
 
             TextView filler = (TextView) mainView.findViewById(R.id.fillerNoCourse);
             boolean holderHasFiller = true;
+
+            LinearLayout rel = (LinearLayout) mainView.findViewById(R.id.relHolder);
+
 
             LinearLayout holder = (LinearLayout) mainView.findViewById(R.id.courseHolders);
 
@@ -265,10 +402,10 @@ public class display_schedulable_courses extends AppCompatActivity {
             }
 
 
-            for (final fillCourse.condensedCourseTotal ourCourse : fitsInSchedule) {
+            for (final extendedCondensed ourCourse : fitsInSchedule) {
                 Log.d("NewElement", "Instantiating course: " + ourCourse.courseCode);
                 if (holderHasFiller) {
-                    holder.removeView(filler);
+                    rel.removeView(filler);
                     holderHasFiller = false;
                 }
                 View toReturn = LayoutInflater.from(sharedContext).inflate(R.layout.artsci_course_info, holder, false);
@@ -278,12 +415,60 @@ public class display_schedulable_courses extends AppCompatActivity {
                 final TextView coursePrereqs = (TextView) toReturn.findViewById(R.id.coursePrereqs);
                 final TextView courseSection = (TextView) toReturn.findViewById(R.id.courseSection);
                 final TextView courseSession = (TextView) toReturn.findViewById(R.id.courseSession);
+                final TextView lectureTimes = (TextView) toReturn.findViewById(R.id.lectureTimes);
+                final TextView tutorialTimes = (TextView) toReturn.findViewById(R.id.tutorialTimes);
+                final TextView practicalTimes = (TextView) toReturn.findViewById(R.id.practicalTimes);
+
+                final AppCompatButton expandButton = (AppCompatButton) toReturn.findViewById(R.id.expandButton);
+                final LinearLayout detailsLayout = (LinearLayout) toReturn.findViewById(R.id.hideDetails);
+                LinearLayout totalLayout = (LinearLayout) toReturn.findViewById(R.id.totalCourseHolder);
+                final flagClass expandFlag = new flagClass();
+                expandFlag.flag = false;
+                detailsLayout.setVisibility(View.GONE);
+                expandButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(expandFlag.flag)
+                        {
+                            detailsLayout.setVisibility(View.GONE);
+                            expandFlag.flag = false;
+                            expandButton.setText("Expand");
+                        }
+                        else
+                        {
+                            detailsLayout.setVisibility(View.VISIBLE);
+                            expandFlag.flag = true;
+                            expandButton.setText("Collapse");
+                        }
+                    }
+                });
+                totalLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(expandFlag.flag)
+                        {
+                            detailsLayout.setVisibility(View.GONE);
+                            expandFlag.flag = false;
+                            expandButton.setText("Expand");
+                        }
+                        else
+                        {
+                            detailsLayout.setVisibility(View.VISIBLE);
+                            expandFlag.flag = true;
+                            expandButton.setText("Collapse");
+                        }
+                    }
+                });
 
                 courseCode.setText("Code: " + ourCourse.courseCode);
                 courseTitle.setText("Title: " + ourCourse.courseTitle);
                 courseDescrip.setText("Descrip: " + ourCourse.courseDescrip);
                 coursePrereqs.setText("Prereqs: " + ourCourse.coursePrereqs);
                 courseSection.setText("Section: " + ourCourse.courseSection);
+                lectureTimes.setText(ourCourse.lectureTimes);
+                tutorialTimes.setText(ourCourse.tutorialTimes);
+                practicalTimes.setText(ourCourse.practicalTimes);
+
                 if (ourCourse.courseSection.contains("S") && (int) ourCourse.courseSession.charAt(ourCourse.courseSession.length() - 1) == 57) {
                     int temp = Integer.parseInt(ourCourse.courseSession);
                     courseSession.setText("Session: " + Integer.toString(temp + 2));
@@ -332,7 +517,7 @@ public class display_schedulable_courses extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     boolean addFlag = true;
-                                    for(fillCourse.condensedCourseTotal checkCourse : sharedList.get(1)) {
+                                    for(extendedCondensed checkCourse : sharedList.get(1)) {
                                         if(checkCourse.courseCode.length() == ourCourse.courseCode.length() && Objects.equals(checkCourse.courseCode, ourCourse.courseCode));
                                         {
                                             boolean innerFlag = true;
@@ -417,15 +602,20 @@ public class display_schedulable_courses extends AppCompatActivity {
                 }
                 holder.addView(toReturn);
             }
-            if(position == 1) { savedViewHolder = holder; };
+            if(position == 1) { savedViewHolder = holder; savedCoursesTextView = filler; }
             container.addView(mainView);
             return (mainView);
         }
 
-        private void reinstantiateSavedViews(ArrayList<fillCourse.condensedCourseTotal> listToReinstance) {
-            savedViewHolder.removeAllViews();
+        private void reinstantiateSavedViews(ArrayList<extendedCondensed> listToReinstance) {
             Log.d("ChildCount", "Total Child Count is: " + Integer.toString(savedViewHolder.getChildCount()));
-            for (final fillCourse.condensedCourseTotal ourCourse : listToReinstance) {
+            savedViewHolder.removeAllViews();
+            if(listToReinstance.size() == 0) { savedCoursesTextView.setText("Couldn't find any saved courses :("); }
+            else
+            {
+                savedCoursesTextView.setText("");
+            }
+            for (final extendedCondensed ourCourse : listToReinstance) {
                 Log.d("NewElement", "Instantiating course: " + ourCourse.courseCode);
 
                 View toReturn = LayoutInflater.from(sharedContext).inflate(R.layout.artsci_course_info, savedViewHolder, false);
@@ -435,12 +625,61 @@ public class display_schedulable_courses extends AppCompatActivity {
                 final TextView coursePrereqs = (TextView) toReturn.findViewById(R.id.coursePrereqs);
                 final TextView courseSection = (TextView) toReturn.findViewById(R.id.courseSection);
                 final TextView courseSession = (TextView) toReturn.findViewById(R.id.courseSession);
+                final TextView lectureTimes = (TextView) toReturn.findViewById(R.id.lectureTimes);
+                final TextView tutorialTimes = (TextView) toReturn.findViewById(R.id.tutorialTimes);
+                final TextView practicalTimes = (TextView) toReturn.findViewById(R.id.practicalTimes);
+
 
                 courseCode.setText("Code: " + ourCourse.courseCode);
                 courseTitle.setText("Title: " + ourCourse.courseTitle);
                 courseDescrip.setText("Descrip: " + ourCourse.courseDescrip);
                 coursePrereqs.setText("Prereqs: " + ourCourse.coursePrereqs);
                 courseSection.setText("Section: " + ourCourse.courseSection);
+                lectureTimes.setText(ourCourse.lectureTimes);
+                tutorialTimes.setText(ourCourse.tutorialTimes);
+                practicalTimes.setText(ourCourse.practicalTimes);
+
+                final AppCompatButton expandButton = (AppCompatButton) toReturn.findViewById(R.id.expandButton);
+                final LinearLayout detailsLayout = (LinearLayout) toReturn.findViewById(R.id.hideDetails);
+                final LinearLayout totalLayout = (LinearLayout) toReturn.findViewById(R.id.totalCourseHolder);
+                final flagClass expandFlag = new flagClass();
+                expandFlag.flag = false;
+                detailsLayout.setVisibility(View.GONE);
+                expandButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(expandFlag.flag)
+                        {
+                            detailsLayout.setVisibility(View.GONE);
+                            expandFlag.flag = false;
+                            expandButton.setText("Expand");
+                        }
+                        else
+                        {
+                            detailsLayout.setVisibility(View.VISIBLE);
+                            expandFlag.flag = true;
+                            expandButton.setText("Collapse");
+                        }
+                    }
+                });
+                totalLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(expandFlag.flag)
+                        {
+                            detailsLayout.setVisibility(View.GONE);
+                            expandFlag.flag = false;
+                            expandButton.setText("Expand");
+                        }
+                        else
+                        {
+                            detailsLayout.setVisibility(View.VISIBLE);
+                            expandFlag.flag = true;
+                            expandButton.setText("Collapse");
+                        }
+                    }
+                });
+
                 if (ourCourse.courseSection.contains("S") && (int) ourCourse.courseSession.charAt(ourCourse.courseSession.length() - 1) == 57) {
                     int temp = Integer.parseInt(ourCourse.courseSession);
                     courseSession.setText("Session: " + Integer.toString(temp + 2));
@@ -537,7 +776,10 @@ public class display_schedulable_courses extends AppCompatActivity {
                             "courseDescrip text," +
                             "coursePrereqs text," +
                             "courseSection text," +
-                            "courseSession text)"
+                            "courseSession text," +
+                            "lectureTimes text," +
+                            "tutorialTimes text," +
+                            "practicalTimes text)"
             );
         }
 
@@ -548,7 +790,7 @@ public class display_schedulable_courses extends AppCompatActivity {
             onCreate(db);
         }
 
-        public boolean insertCourse (fillCourse.condensedCourseTotal courseToAdd) {
+        public boolean insertCourse (extendedCondensed courseToAdd) {
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues contentValues = new ContentValues();
             contentValues.put("courseCode", courseToAdd.courseCode);
@@ -557,6 +799,9 @@ public class display_schedulable_courses extends AppCompatActivity {
             contentValues.put("coursePrereqs", courseToAdd.coursePrereqs);
             contentValues.put("courseSection", courseToAdd.courseSection);
             contentValues.put("courseSession", courseToAdd.courseSession);
+            contentValues.put("lectureTimes", courseToAdd.lectureTimes);
+            contentValues.put("tutorialTimes", courseToAdd.tutorialTimes);
+            contentValues.put("practicalTimes", courseToAdd.practicalTimes);
             db.insert("courses", null, contentValues);
             return true;
         }
@@ -581,23 +826,26 @@ public class display_schedulable_courses extends AppCompatActivity {
                     new String[] { courseCode });
         }
 
-        public ArrayList<fillCourse.condensedCourseTotal> getAllCourses() {
-            ArrayList<fillCourse.condensedCourseTotal> arrayToReturn = new ArrayList<>();
+        public ArrayList<extendedCondensed> getAllCourses() {
+            ArrayList<extendedCondensed> arrayToReturn = new ArrayList<>();
 
             //hp = new HashMap();
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor cursor =  db.rawQuery( "select * from courses", null );
             cursor.moveToFirst();
-            ArrayList<fillCourse.condensedCourseTotal> listToReturn = new ArrayList<>();
+            ArrayList<extendedCondensed> listToReturn = new ArrayList<>();
             //String courseCode, String courseDescrip, String coursePrereqs, String courseSection, String courseTitle, String courseSession
             while(cursor.isAfterLast() == false){
-                fillCourse.condensedCourseTotal nextCourse = new fillCourse.condensedCourseTotal(
+                extendedCondensed nextCourse = new extendedCondensed(
                         cursor.getString(0),
                         cursor.getString(2),
                         cursor.getString(3),
                         cursor.getString(4),
                         cursor.getString(1),
-                        cursor.getString(5)
+                        cursor.getString(5),
+                        cursor.getString(6),
+                        cursor.getString(7),
+                        cursor.getString(8)
                 );
                 listToReturn.add(nextCourse);
                 cursor.moveToNext();
@@ -605,4 +853,12 @@ public class display_schedulable_courses extends AppCompatActivity {
             return listToReturn;
         }
     }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        finish();
+    }
+
 }

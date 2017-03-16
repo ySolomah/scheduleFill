@@ -11,6 +11,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.SpannedString;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,6 +40,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -101,6 +105,242 @@ public class fillCourse extends AppCompatActivity {
             this.name = name;
             this.description = description;
         }
+    }
+
+    public static class Matches implements Parcelable
+    {
+        public String matchStartTime;
+        public String matchEndTime;
+        public Matches(String matchStartTime, String matchEndTime)
+        {
+            this.matchStartTime = matchStartTime;
+            this.matchEndTime = matchEndTime;
+        }
+        public Matches(Parcel parcel)
+        {
+            this.matchStartTime = parcel.readString();
+            this.matchEndTime = parcel.readString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeString(matchStartTime);
+            parcel.writeString(matchEndTime);
+        }
+
+        public static final Creator<Matches> CREATOR = new Creator<Matches>()
+        {
+            public Matches createFromParcel(Parcel in)
+            {
+                return new Matches(in);
+            }
+            public Matches[] newArray(int size)
+            {
+                return new Matches[size];
+            }
+        };
+    }
+
+    public static class largerMatches implements Parcelable
+    {
+        public String matchStartTime;
+        public String matchEndTime;
+        public String day;
+        public largerMatches(String matchStartTime, String matchEndTime, String day)
+        {
+            this.matchStartTime = matchStartTime;
+            this.matchEndTime = matchEndTime;
+            this.day = day;
+        }
+        public largerMatches(Parcel in)
+        {
+            this.matchStartTime = in.readString();
+            this.matchEndTime = in.readString();
+            this.day = in.readString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeString(matchStartTime);
+            parcel.writeString(matchEndTime);
+            parcel.writeString(day);
+        }
+        public static final Creator<largerMatches> CREATOR = new Creator<largerMatches>()
+        {
+            public largerMatches createFromParcel(Parcel in)
+            {
+                return new largerMatches(in);
+            }
+            public largerMatches[] newArray(int size)
+            {
+                return new largerMatches[size];
+            }
+        };
+    }
+
+    public static class largerMatchesLists implements Parcelable
+    {
+        public ArrayList<largerMatches> lectureLargerMatches;
+        public ArrayList<largerMatches> tutorialLargerMatches;
+        public ArrayList<largerMatches> practicalLargerMatches;
+        public largerMatchesLists(ArrayList<largerMatches> lectureLargerMatches, ArrayList<largerMatches> tutorialLargerMatches, ArrayList<largerMatches> practicalLargerMatches)
+        {
+            this.lectureLargerMatches = lectureLargerMatches;
+            this.tutorialLargerMatches = tutorialLargerMatches;
+            this.practicalLargerMatches = practicalLargerMatches;
+        }
+        public largerMatchesLists(Parcel in) {
+            this.lectureLargerMatches = new ArrayList<>();
+            this.tutorialLargerMatches = new ArrayList<>();
+            this.practicalLargerMatches = new ArrayList<>();
+            int identifier = 0;
+
+            int count = in.readInt();
+
+            ArrayList<String> stringList = new ArrayList<>();
+
+            //in.readStringList(stringList);
+
+            for(int i = 0; i < count; i++)
+            {
+                stringList.add(in.readString());
+            }
+
+            String readIn = "";
+            //readIn = in.readString();
+            //while(readIn != null)
+            //{
+            for (int i = 0; i < stringList.size(); i++) {
+                readIn = stringList.get(i);
+                if (readIn.contains("lecturesStart")) {
+                    Log.d("ID0", "ID0");
+                    identifier = 0;
+                } else if (readIn.contains("tutorialsStart")) {
+                    Log.d("ID1", "ID1");
+                    identifier = 1;
+                } else if (readIn.contains("practicalsStart")) {
+                    Log.d("ID2", "ID2");
+                    identifier = 2;
+                } else if (readIn.contains("next")) {
+                    i++;
+                    Log.d("i++1", "i++1");
+                    String start = stringList.get(i);
+                    i++;
+                    Log.d("i++2", "i++2");
+                    String end = stringList.get(i);
+                    i++;
+                    Log.d("i++3", "i++3");
+                    String day = stringList.get(i);
+                    if (identifier == 0) {
+                        lectureLargerMatches.add(new largerMatches(start, end, day));
+                        Log.d("addLec", "Start: " + start + " End: " + end + " Day: " + day);
+                    }
+                    if (identifier == 1) {
+                        tutorialLargerMatches.add(new largerMatches(start, end, day));
+                        Log.d("addTut", "Start: " + start + " End: " + end + " Day: " + day);
+                    }
+                    if (identifier == 2) {
+                        practicalLargerMatches.add(new largerMatches(start, end, day));
+                        Log.d("addPra", "Start: " + start + " End: " + end + " Day: " + day);
+                    }
+                }
+                //readIn = in.readString();
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            //ArrayList<String> parcel = new ArrayList<>();
+            /*
+            int count = 0;
+            parcel.add("lecturesStart");
+            count++;
+            for(largerMatches lecMatch : lectureLargerMatches)
+            {
+                parcel.add("next");
+                parcel.add(lecMatch.matchStartTime);
+                parcel.add(lecMatch.matchEndTime);
+                parcel.add(lecMatch.day);
+                count += 4;
+            }
+            parcel.add("tutorialsStart");
+            for(largerMatches tutMatch : tutorialLargerMatches)
+            {
+                parcel.add("next");
+                parcel.add(tutMatch.matchStartTime);
+                parcel.add(tutMatch.matchEndTime);
+                parcel.add(tutMatch.day);
+                count += 4;
+            }
+            parcel.add("practicalsStart");
+            for(largerMatches praMatch : practicalLargerMatches)
+            {
+                parcel.add("next");
+                parcel.add(praMatch.matchStartTime);
+                parcel.add(praMatch.matchEndTime);
+                parcel.add(praMatch.day);
+                count += 4
+            }
+            */
+
+            int count = 3 + lectureLargerMatches.size() * 4 + tutorialLargerMatches.size() * 4 + practicalLargerMatches.size() * 4;
+            parcel.writeInt(count);
+            parcel.writeString("lecturesStart");
+            for(largerMatches lecMatch : lectureLargerMatches)
+            {
+                parcel.writeString("next");
+                parcel.writeString(lecMatch.matchStartTime);
+                parcel.writeString(lecMatch.matchEndTime);
+                parcel.writeString(lecMatch.day);
+                //count += 4;
+            }
+            parcel.writeString("tutorialsStart");
+            for(largerMatches tutMatch : tutorialLargerMatches)
+            {
+                parcel.writeString("next");
+                parcel.writeString(tutMatch.matchStartTime);
+                parcel.writeString(tutMatch.matchEndTime);
+                parcel.writeString(tutMatch.day);
+                //count += 4
+            }
+            parcel.writeString("practicalsStart");
+            for(largerMatches praMatch : practicalLargerMatches)
+            {
+                parcel.writeString("next");
+                parcel.writeString(praMatch.matchStartTime);
+                parcel.writeString(praMatch.matchEndTime);
+                parcel.writeString(praMatch.day);
+                //count += 4;
+            }
+            //parcel.writeInt(count);
+        }
+        public static final Creator<largerMatchesLists> CREATOR = new Creator<largerMatchesLists>()
+        {
+            public largerMatchesLists createFromParcel(Parcel in)
+            {
+                return new largerMatchesLists(in);
+            }
+            public largerMatchesLists[] newArray(int size)
+            {
+                return new largerMatchesLists[size];
+            }
+        };
+
     }
 
     public ArrayList<Integer> mondayTimes;
@@ -222,7 +462,7 @@ public class fillCourse extends AppCompatActivity {
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        String baseUrl = "https://timetable.iit.artsci.utoronto.ca/api/courses?org=";
+        String baseUrl = "https://timetable.iit.artsci.utoronto.ca/api/20169/courses?org=";
         final ArrayList<Selections> selectionsList = new ArrayList<>();
         final ArrayList<String> orgNames = new ArrayList<>();
         orgNames.add("");
@@ -418,8 +658,15 @@ public class fillCourse extends AppCompatActivity {
         //setListViewHeightBasedOnChildren(departmentList, listViewFlag.flag);
         final LinearLayout orgHolder = (LinearLayout) findViewById(R.id.holdOrgs);
         final ArrayList<Integer> inflatedLayoutHeights = new ArrayList<>();
+        final TextView orgPlaceholder = (TextView) findViewById(R.id.placeholderOrgs);
+        boolean visibleHolder = true;
         for(Selections selectionToInflate : SelectionsToBeShown)
         {
+            if(visibleHolder)
+            {
+                orgHolder.removeView(orgPlaceholder);
+                visibleHolder = false;
+            }
             LinearLayout nextInflation = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.department_listview_element, orgHolder, false);
             orgHolder.addView(nextInflation);
             final linearLayoutCollect myLayoutCollect = new linearLayoutCollect(-1, nextInflation);
@@ -528,6 +775,7 @@ public class fillCourse extends AppCompatActivity {
         final ArrayList<courseTotal> failedToAddCourses = new ArrayList<>();
         final ArrayList<courseTotal> fitsInSchedule = new ArrayList<courseTotal>();
         final ArrayList<condensedCourseTotal> transferToNext = new ArrayList<>();
+        final ArrayList<largerMatchesLists> transferToNextTimes = new ArrayList<>();
 
 
 
@@ -673,6 +921,7 @@ public class fillCourse extends AppCompatActivity {
                 failedToAddCourses.clear();
                 fitsInSchedule.clear();
                 transferToNext.clear();
+                transferToNextTimes.clear();
 
 
                 /*
@@ -693,7 +942,7 @@ public class fillCourse extends AppCompatActivity {
                 EditText threeCourseCode = (EditText) findViewById(R.id.threeCourseCode);
 
 
-                final String urlToUse = "https://timetable.iit.artsci.utoronto.ca/api/courses?org="
+                final String urlToUse = "https://timetable.iit.artsci.utoronto.ca/api/20169/courses?org="
                         + departmentsSelected.getText().toString()
                         + "&code=" + threeCourseCode.getText().toString()
                         + "&section=" + sectionsString.myString
@@ -736,7 +985,15 @@ public class fillCourse extends AppCompatActivity {
                                     JSONObject courseToBeAdded = data.getJSONObject(key);
                                     String courseCode = courseToBeAdded.getString("code");
                                     String courseDescrip = courseToBeAdded.getString("courseDescription");
+                                    Spanned marked = Html.fromHtml(courseDescrip);
+                                    courseDescrip = marked.toString();
+                                    //if(courseDescrip.length() > 7)
+                                    //{
+                                    //    courseDescrip = courseDescrip.substring(3, courseDescrip.length()-4);
+                                    //}
                                     String coursePrereqs = courseToBeAdded.getString("prerequisite");
+                                    marked = Html.fromHtml(coursePrereqs);
+                                    coursePrereqs = marked.toString();
                                     String courseTitle = courseToBeAdded.getString("courseTitle");
                                     String courseSection = courseToBeAdded.getString("section");
                                     String courseSession = courseToBeAdded.getString("session");
@@ -844,13 +1101,15 @@ public class fillCourse extends AppCompatActivity {
                         continue;
                     }
                     //textQueue.add("Trying to match course: " + evaluateCourse.courseCode);
-                    boolean matchLec = matchTotal(evaluateCourse, evaluateCourse.lec, mondayTimes, tuesdayTimes, wednesdayTimes, thursdayTimes, fridayTimes);
-                    boolean matchTut = matchTotal(evaluateCourse, evaluateCourse.tut, mondayTimes, tuesdayTimes, wednesdayTimes, thursdayTimes, fridayTimes);
-                    boolean matchPra = matchTotal(evaluateCourse, evaluateCourse.pra, mondayTimes, tuesdayTimes, wednesdayTimes, thursdayTimes, fridayTimes);
-                    if(matchLec && matchTut && matchPra)
+                    ArrayList<largerMatches> matchLec = matchTotal(evaluateCourse, evaluateCourse.lec, mondayTimes, tuesdayTimes, wednesdayTimes, thursdayTimes, fridayTimes);
+                    ArrayList<largerMatches> matchTut = matchTotal(evaluateCourse, evaluateCourse.tut, mondayTimes, tuesdayTimes, wednesdayTimes, thursdayTimes, fridayTimes);
+                    ArrayList<largerMatches> matchPra = matchTotal(evaluateCourse, evaluateCourse.pra, mondayTimes, tuesdayTimes, wednesdayTimes, thursdayTimes, fridayTimes);
+                    if(matchLec.size() > 0 && matchTut.size() > 0 && matchPra.size() > 0)
                     {
+                        Log.d("AddingCourse", evaluateCourse.courseCode);
                         fitsInSchedule.add(evaluateCourse);
                         transferToNext.add(new condensedCourseTotal(evaluateCourse.courseCode, evaluateCourse.courseDescrip, evaluateCourse.coursePrereqs, evaluateCourse.courseSection, evaluateCourse.courseTitle, evaluateCourse.courseSession));
+                        transferToNextTimes.add(new largerMatchesLists(matchLec, matchTut, matchPra));
                     }
                     /*for(ArrayList<timeSlot> nextLec : evaluateCourse.lec)
                     {
@@ -892,7 +1151,8 @@ public class fillCourse extends AppCompatActivity {
                     textQueue.add("Fits in schedule: " + availableToPutInSchedule.courseCode + " Section: " + availableToPutInSchedule.courseSection);
                 }
                 Intent nextAct = new Intent(getApplicationContext(), display_schedulable_courses.class);
-                nextAct.putParcelableArrayListExtra("courses", transferToNext);
+                nextAct.putParcelableArrayListExtra("coursesCondensed", transferToNext);
+                nextAct.putParcelableArrayListExtra("coursesTimes", transferToNextTimes);
                 startActivity(nextAct);
 
             }
@@ -900,56 +1160,89 @@ public class fillCourse extends AppCompatActivity {
         });
     }
 
-    public static boolean matchTotal(courseTotal course, ArrayList<ArrayList<timeSlot>> matchAgainst, ArrayList<Integer> mondayTimes, ArrayList<Integer> tuesdayTimes, ArrayList<Integer> wednesdayTimes, ArrayList<Integer> thursdayTimes, ArrayList<Integer> fridayTimes)
+    public static ArrayList<largerMatches> matchTotal(courseTotal course, ArrayList<ArrayList<timeSlot>> matchAgainst, ArrayList<Integer> mondayTimes, ArrayList<Integer> tuesdayTimes, ArrayList<Integer> wednesdayTimes, ArrayList<Integer> thursdayTimes, ArrayList<Integer> fridayTimes)
     {
-        if(matchAgainst.size() == 0) { return(true); }
+        ArrayList<largerMatches> toReturnList = new ArrayList<>();
+        ArrayList<largerMatches> toReturnTotal = new ArrayList<>();
+        if(matchAgainst.size() == 0) { toReturnList.add(new largerMatches("N/A", "N/A", "N/A")); return(toReturnList); }
         for(ArrayList<timeSlot> nextLec : matchAgainst)
         {
             boolean matchFlag = true;
+            Matches potentialMatch = null;
+            toReturnList.add(new largerMatches("X", "X", "X"));
             for(timeSlot time : nextLec)
             {
                 if(time.meetingDay.contains("MO"))
                 {
-                    if(matchTime(time, mondayTimes, course)) { }
-                    else { matchFlag = false; break;}
+                    potentialMatch = matchTime(time, mondayTimes, course);
+                    if( potentialMatch.matchStartTime.equals("-1") ) { matchFlag = false; break; }
+                    else { toReturnList.add(new largerMatches(potentialMatch.matchStartTime, potentialMatch.matchEndTime, "Monday")); }
                 }
                 if(time.meetingDay.contains("TU"))
                 {
-                    if(matchTime(time, tuesdayTimes, course)) { }
-                    else { matchFlag = false; break;}
+                    //if(matchTime(time, tuesdayTimes, course)) { }
+                    //else { matchFlag = false; break;}
+
+                    potentialMatch = matchTime(time, tuesdayTimes, course);
+                    if( potentialMatch.matchStartTime.equals("-1") ) { matchFlag = false; break; }
+                    else { toReturnList.add(new largerMatches(potentialMatch.matchStartTime, potentialMatch.matchEndTime, "Tuesday")); }
+
                 }
                 if(time.meetingDay.contains("WE"))
                 {
-                    if(matchTime(time, wednesdayTimes, course)) { }
-                    else { matchFlag = false; break;}
+                    //if(matchTime(time, wednesdayTimes, course)) { }
+                    //else { matchFlag = false; break;}
+
+                    potentialMatch = matchTime(time, wednesdayTimes, course);
+                    if( potentialMatch.matchStartTime.equals("-1") ) { matchFlag = false; break; }
+                    else { toReturnList.add(new largerMatches(potentialMatch.matchStartTime, potentialMatch.matchEndTime, "Wednesday")); }
+
                 }
                 if(time.meetingDay.contains("TH"))
                 {
-                    if(matchTime(time, thursdayTimes, course)) { }
-                    else { matchFlag = false; break;}
+                    //if(matchTime(time, thursdayTimes, course)) { }
+                    //else { matchFlag = false; break;}
+
+                    potentialMatch = matchTime(time, thursdayTimes, course);
+                    if( potentialMatch.matchStartTime.equals("-1") ) { matchFlag = false; break; }
+                    else { toReturnList.add(new largerMatches(potentialMatch.matchStartTime, potentialMatch.matchEndTime, "Thursday")); }
+
                 }
                 if(time.meetingDay.contains("FR"))
                 {
-                    if(matchTime(time, fridayTimes, course)) { }
-                    else { matchFlag = false; break;}
+                    //if(matchTime(time, fridayTimes, course)) { }
+                    //else { matchFlag = false; break;}
+
+                    potentialMatch = matchTime(time, fridayTimes, course);
+                    if( potentialMatch.matchStartTime.equals("-1") ) { matchFlag = false; break; }
+                    else { toReturnList.add(new largerMatches(potentialMatch.matchStartTime, potentialMatch.matchEndTime, "Friday")); }
+
                 }
             }
-            if(matchFlag) { return(true); }
+            //if(matchFlag) { return(toReturnList); }
+            if(matchFlag)
+            {
+                for(int k = 0; k < toReturnList.size(); k++)
+                {
+                    toReturnTotal.add(toReturnList.get(k));
+                }
+            }
+            toReturnList.clear();
         }
-        return(false);
+        return(toReturnTotal);
     }
 
-    public static boolean matchTime(timeSlot time, ArrayList<Integer> scheduleFitting, courseTotal course)
+    public static Matches matchTime(timeSlot time, ArrayList<Integer> scheduleFitting, courseTotal course)
     {
         for(int i = 0; i < scheduleFitting.size()/2; i++)
         {
             if(time.startTime >= scheduleFitting.get(i*2) && time.endTime <= scheduleFitting.get((i*2) + 1))
             {
                 //Log.d("MATCH","Matched: " + course.courseCode + " With Start: " + Integer.toString(time.startTime) + " With End: " + Integer.toString(time.endTime));
-                return(true);
+                return(new Matches(Integer.toString(time.startTime), Integer.toString(time.endTime)));
             }
         }
-        return(false);
+        return(new Matches("-1", "-1"));
     }
 
 
@@ -1079,7 +1372,7 @@ public class fillCourse extends AppCompatActivity {
 
             startSpinner.setOnItemSelectedListener( new customStartEndAdapter(myTimes.size()-2, myTimes) );
             endSpinner.setOnItemSelectedListener( new customStartEndAdapter(myTimes.size()-1, myTimes) );
-            Toast.makeText(sharedContext, "Successfully added new spinners", Toast.LENGTH_LONG).show();
+            //Toast.makeText(sharedContext, "Successfully added new spinners", Toast.LENGTH_LONG).show();
         }
     }
 

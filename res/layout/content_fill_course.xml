@@ -10,20 +10,22 @@
     android:paddingRight="5dp"
     android:paddingTop="5dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.yassir.schedulefill.fillCourse"
+    tools:context="com.uoft.gobblgobble.schedulefiller.fillCourse"
     tools:showIn="@layout/activity_fill_course">
 
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:focusableInTouchMode="true">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/back"
-        android:id="@+id/dayTimeHolder">
+        android:id="@+id/dayTimeHolder"
+        android:focusableInTouchMode="true">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -247,7 +249,7 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/courseCodeText"
                         android:layout_margin="4dp"
-                        android:text="Input the three letter course code you're interested in below"/>
+                        android:text="(Optional) Input the three letter course code you're interested in below"/>
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
@@ -305,7 +307,7 @@
                 <TextView
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
-                    android:hint="orgsSelected"
+                    android:hint="Select Course Deptartments From List Below"
                     android:id="@+id/orgList"/>
                 <Button
                     android:layout_width="fill_parent"
@@ -338,6 +340,12 @@
                 android:orientation="vertical"
                 android:id="@+id/holdOrgs"
                 android:layout_below="@id/deptSearchRel">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/placeholderOrgs"
+                    android:text="Failed to collect course data :(, please ensure you have internet connectivity and restart the application"/>
 
             </LinearLayout>
 
