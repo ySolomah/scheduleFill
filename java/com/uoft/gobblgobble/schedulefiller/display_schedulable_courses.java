@@ -1,5 +1,6 @@
 package com.uoft.gobblgobble.schedulefiller;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -53,7 +54,9 @@ public class display_schedulable_courses extends AppCompatActivity {
     //clientid: 520022971062-0oe9q78f1b72f917kuf8igfujb2tlman.apps.googleusercontent.com
     //client_secret: 2WpqiXlNZUxxzIhwrF_Wubbq
 
-    public class flagClass
+    String oauthCode;
+
+    public static class flagClass
     {
         public boolean flag;
         public flagClass()
@@ -62,13 +65,13 @@ public class display_schedulable_courses extends AppCompatActivity {
         }
     }
 
-    public class stringClass
+    public static class stringClass
     {
         public String myString;
         public stringClass() { myString = ""; }
     }
 
-    public class intClass
+    public static class intClass
     {
         public int myInt;
         public intClass() { myInt = 0; }
@@ -97,7 +100,68 @@ public class display_schedulable_courses extends AppCompatActivity {
             this.tutorialTimes = tutorialTimes;
             this.practicalTimes = practicalTimes;
         }
+    }
+    public static class extendedCondensedWithoutMatchInfo implements Parcelable
+    {
+        String courseCode;
+        String courseTitle;
+        String courseDescrip;
+        String coursePrereqs;
+        String courseSection;
+        String courseSession;
+        String lectureTimes;
+        String tutorialTimes;
+        String practicalTimes;
+        public extendedCondensedWithoutMatchInfo(String courseCode, String courseDescrip, String coursePrereqs, String courseSection, String courseTitle, String courseSession, String lectureTimes, String tutorialTimes, String practicalTimes) {
+            this.courseSession = courseSession;
+            this.courseCode = courseCode;
+            this.courseDescrip = courseDescrip;
+            this.coursePrereqs = coursePrereqs;
+            this.courseSection = courseSection;
+            this.courseTitle = courseTitle;
+            this.lectureTimes = lectureTimes;
+            this.tutorialTimes = tutorialTimes;
+            this.practicalTimes = practicalTimes;
+        }
+        public extendedCondensedWithoutMatchInfo(Parcel in)
+        {
+            this.courseCode = in.readString();
+            this.courseTitle = in.readString();
+            this.courseDescrip = in.readString();
+            this.coursePrereqs = in.readString();
+            this.courseSection = in.readString();
+            this.courseSession = in.readString();
+            this.lectureTimes = in.readString();
+            this.tutorialTimes = in.readString();
+            this.practicalTimes = in.readString();
+        }
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeString(courseCode);
+            parcel.writeString(courseTitle);
+            parcel.writeString(courseDescrip);
+            parcel.writeString(coursePrereqs);
+            parcel.writeString(courseSection);
+            parcel.writeString(courseSession);
+            parcel.writeString(lectureTimes);
+            parcel.writeString(tutorialTimes);
+            parcel.writeString(practicalTimes);
+        }
+        public static Creator<extendedCondensedWithoutMatchInfo> CREATOR = new Creator<extendedCondensedWithoutMatchInfo>() {
+            @Override
+            public extendedCondensedWithoutMatchInfo createFromParcel(Parcel parcel) {
+                return (new extendedCondensedWithoutMatchInfo(parcel));
+            }
 
+            @Override
+            public extendedCondensedWithoutMatchInfo[] newArray(int i) {
+                return new extendedCondensedWithoutMatchInfo[i];
+            }
+        };
     }
     public static class extendedCondensedSavedExtra {
         String courseCode;
@@ -438,7 +502,7 @@ public class display_schedulable_courses extends AppCompatActivity {
             setSupportActionBar(toolbar);
 
 
-            ArrayList<extendedCondensed> fitsInSchedule = sharedList.get(position % sharedList.size());
+            final ArrayList<extendedCondensed> fitsInSchedule = sharedList.get(position % sharedList.size());
 
             MobileAds.initialize(sharedContext, "ca-app-pub-5269640446877970~6452380842");
 
@@ -450,6 +514,42 @@ public class display_schedulable_courses extends AppCompatActivity {
             boolean holderHasFiller = true;
 
             LinearLayout rel = (LinearLayout) mainView.findViewById(R.id.relHolder);
+
+            if(position == 1) {
+                View calenderButton = LayoutInflater.from(sharedContext).inflate(R.layout.calender_login, rel, false);
+                rel.addView(calenderButton);
+                Button calenderLogin = (Button) calenderButton.findViewById(R.id.calenderLogin);
+                calenderLogin.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(fitsInSchedule.size() == 0)
+                        {
+                            Toast.makeText(sharedContext, "Add courses first!", Toast.LENGTH_LONG).show();
+                        }
+                        else
+                        {
+                            ArrayList<extendedCondensedWithoutMatchInfo> calendarSyncList = new ArrayList<extendedCondensedWithoutMatchInfo>();
+                            for(int i = 0; i < fitsInSchedule.size(); i++)
+                            {
+                                calendarSyncList.add(new extendedCondensedWithoutMatchInfo(
+                                        fitsInSchedule.get(i).courseCode,
+                                        fitsInSchedule.get(i).courseDescrip,
+                                        fitsInSchedule.get(i).coursePrereqs,
+                                        fitsInSchedule.get(i).courseSection,
+                                        fitsInSchedule.get(i).courseTitle,
+                                        fitsInSchedule.get(i).courseSession,
+                                        fitsInSchedule.get(i).lectureTimes,
+                                        fitsInSchedule.get(i).tutorialTimes,
+                                        fitsInSchedule.get(i).practicalTimes
+                                        ));
+                            }
+                            Intent i = new Intent(sharedContext, calender_sync.class);
+                            i.putParcelableArrayListExtra("coursesToSync", calendarSyncList);
+                            startActivityForResult(i, 1);
+                        }
+                    }
+                });
+            }
 
 
             LinearLayout holder = (LinearLayout) mainView.findViewById(R.id.courseHolders);
@@ -1359,4 +1459,21 @@ public class display_schedulable_courses extends AppCompatActivity {
         finish();
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if(requestCode == 1)
+        {
+            if(resultCode == Activity.RESULT_OK)
+            {
+                oauthCode = data.getStringExtra("code");
+                Toast.makeText(this, "Success!", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

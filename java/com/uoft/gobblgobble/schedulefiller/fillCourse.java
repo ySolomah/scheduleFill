@@ -29,6 +29,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -445,6 +447,17 @@ public class fillCourse extends AppCompatActivity {
             }
         };
     }
+
+    public class loadInfo
+    {
+        public int height;
+        public ProgressBar ourBar;
+        public loadInfo(int height, ProgressBar ourBar)
+        {
+            this.height = height;
+            this.ourBar = ourBar;
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -456,7 +469,32 @@ public class fillCourse extends AppCompatActivity {
         listViewFlag = new flagClass();
 
         textQueue = new LinkedList<>();
-
+        /*final loadInfo ourBarInfo = new loadInfo(-1, (ProgressBar) findViewById(R.id.loadingPanel));
+        ourBarInfo.height = 20;
+        ourBarInfo.height = ourParams.height;
+        ourParams.height = 0;
+        ourBarInfo.ourBar.setLayoutParams(ourParams);
+        Thread collectLoadInfo = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(ourBarInfo.height == -1)
+                {
+                    ViewGroup.LayoutParams ourParams = ourBarInfo.ourBar.getLayoutParams();
+                    int tempHeight = ourParams.height;
+                    if(tempHeight > 0)
+                    {
+                        ourBarInfo.height = ourParams.height;
+                        ourParams.height = 0;
+                        ourBarInfo.ourBar.setLayoutParams(ourParams);
+                        Log.d("RecordedHeight", "Height is: " + ourBarInfo.height);
+                    }
+                    Log.d("HeightFound", "Height found was: " + tempHeight);
+                    Log.d("WidthFound", "Width found was: " + ourParams.width);
+                    //Log.d("TotalHeight", "TotalHeight: " + ourParams.layoutAnimationParameters.toString());
+                }
+            }
+        });
+        collectLoadInfo.start();*/
 
         //final WebView loadHtml = (WebView) findViewById(R.id.loadHtml);
 
@@ -842,8 +880,38 @@ public class fillCourse extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                /*runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ViewGroup.LayoutParams ourParams = ourBarInfo.ourBar.getLayoutParams();
+                        ourParams.height = ourBarInfo.height;
+                        ourBarInfo.ourBar.setLayoutParams(ourParams);
+                        Log.d("SettingHeight", "Height set to: " + ourBarInfo.height);
+                    }
+                });
+                try {
+                    Thread.sleep(100);
+                }
+                catch (InterruptedException e)
+                { }*/
+                final RelativeLayout mainHolder = (RelativeLayout) findViewById(R.id.content_fill_course);
+                final RelativeLayout ourBar = (RelativeLayout) LayoutInflater.from(fillCourse.this).inflate(R.layout.progress_bar, mainHolder, false);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainHolder.addView(ourBar);
+                    }
+                });
+
+
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                Thread dataCollectThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+
                 textQueue.add("MONDAY: ");
                 int count = 0;
                 for(int i : mondayTimes)
@@ -1150,11 +1218,35 @@ public class fillCourse extends AppCompatActivity {
                 {
                     textQueue.add("Fits in schedule: " + availableToPutInSchedule.courseCode + " Section: " + availableToPutInSchedule.courseSection);
                 }
+
                 Intent nextAct = new Intent(getApplicationContext(), display_schedulable_courses.class);
                 nextAct.putParcelableArrayListExtra("coursesCondensed", transferToNext);
                 nextAct.putParcelableArrayListExtra("coursesTimes", transferToNextTimes);
                 startActivity(nextAct);
-
+                //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                /*
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ViewGroup.LayoutParams ourParams = ourBarInfo.ourBar.getLayoutParams();
+                        ourParams.height = 0;
+                        ourBarInfo.ourBar.setLayoutParams(ourParams);
+                    }
+                });*/
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mainHolder.removeView(ourBar);
+                            }
+                        });
+                    }
+                });
+                dataCollectThread.start();
+                /*
+                try {
+                    dataCollectThread.join();
+                }
+                catch (InterruptedException e) { }*/
             }
 
         });

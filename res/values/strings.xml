@@ -93,4 +93,6 @@
     </string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_display_schedulable_courses">display_schedulable_courses</string>
+    <string name="title_activity_calender_sync">calender_sync</string>
+    <string name="title_activity_access_token_receiver">AccessTokenReceiver</string>
 </resources>

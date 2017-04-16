@@ -3,6 +3,8 @@
     package="com.uoft.gobblgobble.schedulefiller">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <application
         android:allowBackup="true"
@@ -23,12 +25,29 @@
         <activity
             android:name=".display_schedulable_courses"
             android:label="@string/title_activity_display_schedulable_courses"
-            android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".fillCourse"
             android:label="fillCourses"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".displayArtSciCourses"></activity>
+        <activity android:name=".displayArtSciCourses" />
+        <activity
+            android:name=".calender_sync"
+            android:label="@string/title_activity_calender_sync"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
+        <activity
+            android:name=".AccessTokenReceiver"
+            android:label="@string/title_activity_access_token_receiver"
+            android:theme="@style/AppTheme.NoActionBar"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="logincallback.com" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
